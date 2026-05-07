@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IILM Hostel Support Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#1e3a8a', 
+                            light: '#3b82f6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f3f4f6; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <img src="{{ url_for('static', filename='University_logostandard-BLUE-copy.png') }}" alt="IILM Logo" class="h-14">
+                    <span class="ml-4 text-xl font-bold text-brand-dark hidden sm:block">Hostel Support System</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userBadge" class="hidden px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium border border-blue-200"></span>
+                    <button id="logoutBtn" onclick="logout()" class="hidden flex items-center text-gray-500 hover:text-red-600 transition font-medium">
+                        <i data-feather="log-out" class="w-5 h-5 mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-6">
+        
+        <div id="loginSection" class="w-full max-w-md">
+            <div class="glass-card shadow-xl rounded-2xl p-8 border border-gray-100">
+                <div class="text-center mb-8">
+                    <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100">
+                        <i data-feather="user" class="text-brand-dark w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
+                    <p class="text-sm text-gray-500 mt-1">Please select your portal role</p>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Role</label>
+                        <select id="roleSelect" class="w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-brand-light focus:border-brand-light sm:text-sm rounded-xl border bg-gray-50 transition cursor-pointer">
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher / Warden</option>
+                            <option value="admin">System Admin</option>
+                        </select>
+                    </div>
+                    <button onclick="login()" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-brand-dark hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light transition transform hover:-translate-y-0.5">
+                        Sign In to Portal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="studentDashboard" class="hidden w-full max-w-4xl">
+            <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+                <div class="bg-brand-dark px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center">
+                        <i data-feather="edit-3" class="mr-2"></i> Register a Hostel Complaint
+                    </h2>
+                </div>
+                <form id="complaintForm" class="p-8 space-y-6" onsubmit="submitComplaint(event)">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 border-b border-gray-100">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="studentName" required class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
+                            <input type="text" id="rollNumber" required placeholder="e.g. 23CS1001" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">College Email ID</label>
+                            <input type="email" id="collegeEmail" required placeholder="name@iilm.edu" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-gray-100">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Hostel Name / Block</label>
+                            <input type="text" id="hostelName" required placeholder="e.g. Boys Hostel A" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Room Number</label>
+                            <input type="text" id="roomNumber" required placeholder="e.g. 204" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Issue Category / Title</label>
+                        <input type="text" id="issueTitle" required placeholder="e.g. AC not cooling, Broken Chair" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition mb-4">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Detailed Description</label>
+                        <textarea id="issueDesc" rows="4" required placeholder="Provide as much detail as possible..." class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition"></textarea>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-brand-dark hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light transition">
+                            <i data-feather="send" class="w-5 h-5 mr-2"></i> Submit Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="staffDashboard" class="hidden w-full max-w-7xl">
+            <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+                <div class="bg-white px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                        <i data-feather="inbox" class="text-brand-dark mr-2"></i> Active Complaints Tracker
+                    </h2>
+                    <button onclick="fetchComplaints()" class="text-sm text-gray-500 hover:text-brand-dark flex items-center bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 transition">
+                        <i data-feather="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh List
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Student Details</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Issue Overview</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaintsTableBody" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        feather.replace();
+
+        const API_URL = '/api/complaints';
+        let currentRole = '';
+
+        function login() {
+            currentRole = document.getElementById('roleSelect').value;
+            
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+            const badge = document.getElementById('userBadge');
+            badge.classList.remove('hidden');
+            badge.innerText = `Role: ${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}`;
+
+            if (currentRole === 'student') {
+                document.getElementById('studentDashboard').classList.remove('hidden');
+            } else {
+                document.getElementById('staffDashboard').classList.remove('hidden');
+                fetchComplaints();
+            }
+
+            Swal.fire({
+                toast: true, position: 'top-end', icon: 'success',
+                title: `Logged in as ${currentRole}`, showConfirmButton: false, timer: 2000
+            });
+        }
+
+        function logout() {
+            currentRole = '';
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('studentDashboard').classList.add('hidden');
+            document.getElementById('staffDashboard').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('userBadge').classList.add('hidden');
+        }
+
+        async function submitComplaint(e) {
+            e.preventDefault();
+            
+            Swal.fire({
+                title: 'Submitting...', allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
+
+            const payload = {
+                student_name: document.getElementById('studentName').value,
+                roll_number: document.getElementById('rollNumber').value,
+                college_email: document.getElementById('collegeEmail').value,
+                hostel_name: document.getElementById('hostelName').value,
+                room_number: document.getElementById('roomNumber').value,
+                issue_title: document.getElementById('issueTitle').value,
+                issue_description: document.getElementById('issueDesc').value
+            };
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                document.getElementById('complaintForm').reset();
+                Swal.fire({
+                    icon: 'success', title: 'Submitted!',
+                    text: 'Your complaint has been registered with the warden.',
+                    confirmButtonColor: '#1e3a8a'
+                });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Something went wrong!' });
+            }
+        }
+
+        async function fetchComplaints() {
+            const response = await fetch(API_URL);
+            const complaints = await response.json();
+            const tbody = document.getElementById('complaintsTableBody');
+            tbody.innerHTML = '';
+
+            if(complaints.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No active complaints found.</td></tr>`;
+                return;
+            }
+
+            complaints.forEach(c => {
+                let statusBadge = '';
+                if(c.status === 'Pending') statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">Pending</span>`;
+                else if (c.status === 'In Progress') statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">In Progress</span>`;
+                else statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">Resolved</span>`;
+
+                let dateObj = new Date(c.date_submitted);
+                let formattedDate = dateObj.toLocaleDateString('en-GB') + '<br><span class="text-xs text-gray-400">' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + '</span>';
+
+                let actions = '';
+                if (c.status !== 'Resolved') {
+                    actions = `
+                        <div class="flex justify-end space-x-2">
+                            ${c.status === 'Pending' ? `<button onclick="updateStatus(${c.id}, 'In Progress')" class="text-yellow-600 hover:text-yellow-900 bg-yellow-50 hover:bg-yellow-100 p-2 rounded-lg transition" title="Mark In Progress"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></button>` : ''}
+                            <button onclick="updateStatus(${c.id}, 'Resolved')" class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition" title="Mark Resolved"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>
+                        </div>
+                    `;
+                } else {
+                    actions = `<span class="text-gray-400 text-sm flex justify-end items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Closed</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-900">${c.student_name}</div>
+                            <div class="text-xs text-gray-500 mt-0.5">${c.roll_number}</div>
+                            <a href="mailto:${c.college_email}" class="text-xs text-blue-600 hover:underline">${c.college_email}</a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${c.hostel_name}</div>
+                            <div class="text-sm text-gray-500">Room: <span class="font-bold">${c.room_number}</span></div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-bold text-gray-900">${c.issue_title}</div>
+                            <div class="text-sm text-gray-500 line-clamp-2 mt-0.5">${c.issue_description}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${actions}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function updateStatus(id, newStatus) {
+            await fetch(`${API_URL}/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            
+            Swal.fire({
+                toast: true, position: 'bottom-end', icon: 'success',
+                title: `Status updated to ${newStatus}`, showConfirmButton: false, timer: 2000
+            });
+            
+            fetchComplaints(); 
+        }
+    </script>
+</body>
+</html>
