@@ -7,27 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/feather-icons"></script>
-    
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            dark: '#1e3a8a', 
-                            light: '#3b82f6'
-                        }
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { colors: { brand: { dark: '#1e3a8a', light: '#3b82f6' } } } } }
     </script>
     <style>
         body { background-color: #f3f4f6; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body class="text-gray-800 font-sans antialiased min-h-screen flex flex-col">
@@ -51,77 +36,91 @@
 
     <main class="flex-grow flex items-center justify-center p-6">
         
-        <div id="loginSection" class="w-full max-w-md">
+        <div id="authSection" class="w-full max-w-md">
             <div class="glass-card shadow-xl rounded-2xl p-8 border border-gray-100">
+                
                 <div class="text-center mb-8">
                     <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100">
-                        <i data-feather="user" class="text-brand-dark w-8 h-8"></i>
+                        <i data-feather="lock" class="text-brand-dark w-8 h-8"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
-                    <p class="text-sm text-gray-500 mt-1">Please select your portal role</p>
+                    <h2 id="authTitle" class="text-2xl font-bold text-gray-900">Sign In</h2>
+                    <p id="authSubtitle" class="text-sm text-gray-500 mt-1">Enter your credentials to access the portal</p>
                 </div>
 
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Role</label>
-                        <select id="roleSelect" class="w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-brand-light focus:border-brand-light sm:text-sm rounded-xl border bg-gray-50 transition cursor-pointer">
-                            <option value="student">Student</option>
-                            <option value="teacher">Teacher / Warden</option>
-                            <option value="admin">System Admin</option>
-                        </select>
+                <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+                    
+                    <div id="signupFields" class="hidden space-y-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="regName" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
+                            <input type="text" id="regRoll" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light transition">
+                        </div>
                     </div>
-                    <button onclick="login()" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-brand-dark hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light transition transform hover:-translate-y-0.5">
-                        Sign In to Portal
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="authEmail" required placeholder="name@iilm.edu" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="authPassword" required placeholder="••••••••" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light transition">
+                    </div>
+
+                    <button type="submit" id="authSubmitBtn" class="w-full py-3 px-4 rounded-xl shadow-sm text-sm font-bold text-white bg-brand-dark hover:bg-blue-800 transition transform hover:-translate-y-0.5">
+                        Login
                     </button>
+                </form>
+
+                <div class="mt-6 text-center text-sm text-gray-600">
+                    <span id="authToggleText">Don't have an account?</span> 
+                    <button onclick="toggleAuthMode()" class="text-brand-light hover:underline font-bold" id="authToggleBtn">Sign Up here</button>
                 </div>
             </div>
         </div>
 
-        <div id="studentDashboard" class="hidden w-full max-w-4xl">
+        <div id="studentDashboard" class="hidden w-full max-w-4xl flex-col gap-6">
+            <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100 w-full mb-6">
+                <div class="bg-white px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                        <i data-feather="list" class="text-brand-dark mr-2"></i> My Past Complaints
+                    </h2>
+                    <button onclick="fetchComplaints()" class="text-sm text-gray-500 hover:text-brand-dark">Refresh</button>
+                </div>
+                <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <tbody id="studentComplaintsTableBody" class="bg-white divide-y divide-gray-200 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
                 <div class="bg-brand-dark px-6 py-4">
                     <h2 class="text-xl font-bold text-white flex items-center">
-                        <i data-feather="edit-3" class="mr-2"></i> Register a Hostel Complaint
+                        <i data-feather="edit-3" class="mr-2"></i> Register a New Complaint
                     </h2>
                 </div>
                 <form id="complaintForm" class="p-8 space-y-6" onsubmit="submitComplaint(event)">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 border-b border-gray-100">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                            <input type="text" id="studentName" required class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
-                            <input type="text" id="rollNumber" required placeholder="e.g. 23CS1001" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">College Email ID</label>
-                            <input type="email" id="collegeEmail" required placeholder="name@iilm.edu" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
-                        </div>
-                    </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-gray-100">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Hostel Name / Block</label>
-                            <input type="text" id="hostelName" required placeholder="e.g. Boys Hostel A" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
+                            <input type="text" id="hostelName" required class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Room Number</label>
-                            <input type="text" id="roomNumber" required placeholder="e.g. 204" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition">
+                            <input type="text" id="roomNumber" required class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light transition">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Issue Category / Title</label>
-                        <input type="text" id="issueTitle" required placeholder="e.g. AC not cooling, Broken Chair" class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition mb-4">
-                        
+                        <input type="text" id="issueTitle" required class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Detailed Description</label>
-                        <textarea id="issueDesc" rows="4" required placeholder="Provide as much detail as possible..." class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light focus:border-brand-light transition"></textarea>
+                        <textarea id="issueDesc" rows="4" required class="w-full border-gray-300 rounded-lg p-3 bg-gray-50 border focus:ring-brand-light"></textarea>
                     </div>
-
                     <div class="flex justify-end pt-2">
-                        <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-brand-dark hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light transition">
+                        <button type="submit" class="px-6 py-3 rounded-lg text-white bg-brand-dark hover:bg-blue-800 transition flex items-center">
                             <i data-feather="send" class="w-5 h-5 mr-2"></i> Submit Ticket
                         </button>
                     </div>
@@ -133,26 +132,23 @@
             <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
                 <div class="bg-white px-6 py-5 border-b border-gray-200 flex justify-between items-center">
                     <h2 class="text-xl font-bold text-gray-900 flex items-center">
-                        <i data-feather="inbox" class="text-brand-dark mr-2"></i> Active Complaints Tracker
+                        <i data-feather="shield" class="text-brand-dark mr-2"></i> Admin Support Panel
                     </h2>
-                    <button onclick="fetchComplaints()" class="text-sm text-gray-500 hover:text-brand-dark flex items-center bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 transition">
-                        <i data-feather="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh List
-                    </button>
+                    <button onclick="fetchComplaints()" class="text-sm bg-gray-50 px-3 py-1.5 rounded-lg border">Refresh List</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date & Time</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Student Details</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Issue Overview</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Date</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Student</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Location</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Issue</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
+                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="complaintsTableBody" class="bg-white divide-y divide-gray-200">
-                            </tbody>
+                        <tbody id="complaintsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
             </div>
@@ -163,144 +159,169 @@
     <script>
         feather.replace();
 
-        const API_URL = '/api/complaints';
-        let currentRole = '';
+        let isLoginMode = true;
+        let currentUser = null;
 
-        function login() {
-            currentRole = document.getElementById('roleSelect').value;
-            
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-            
-            const badge = document.getElementById('userBadge');
-            badge.classList.remove('hidden');
-            badge.innerText = `Role: ${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}`;
-
-            if (currentRole === 'student') {
-                document.getElementById('studentDashboard').classList.remove('hidden');
-            } else {
-                document.getElementById('staffDashboard').classList.remove('hidden');
-                fetchComplaints();
+        // Check session on load
+        window.onload = async () => {
+            const res = await fetch('/api/me');
+            if(res.ok) {
+                currentUser = await res.json();
+                loadDashboard();
             }
+        };
 
-            Swal.fire({
-                toast: true, position: 'top-end', icon: 'success',
-                title: `Logged in as ${currentRole}`, showConfirmButton: false, timer: 2000
-            });
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('signupFields').classList.toggle('hidden');
+            document.getElementById('regName').required = !isLoginMode;
+            document.getElementById('regRoll').required = !isLoginMode;
+            
+            document.getElementById('authTitle').innerText = isLoginMode ? 'Sign In' : 'Create Account';
+            document.getElementById('authSubtitle').innerText = isLoginMode ? 'Enter your credentials to access the portal' : 'Register as a student';
+            document.getElementById('authSubmitBtn').innerText = isLoginMode ? 'Login' : 'Sign Up';
+            document.getElementById('authToggleText').innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
+            document.getElementById('authToggleBtn').innerText = isLoginMode ? 'Sign Up here' : 'Login here';
         }
 
-        function logout() {
-            currentRole = '';
-            document.getElementById('loginSection').classList.remove('hidden');
+        async function handleAuth(e) {
+            e.preventDefault();
+            const endpoint = isLoginMode ? '/api/login' : '/api/signup';
+            
+            const payload = {
+                email: document.getElementById('authEmail').value,
+                password: document.getElementById('authPassword').value
+            };
+
+            if(!isLoginMode) {
+                payload.full_name = document.getElementById('regName').value;
+                payload.roll_number = document.getElementById('regRoll').value;
+            }
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                if(!isLoginMode) {
+                    Swal.fire('Success', 'Account created! Please log in.', 'success');
+                    toggleAuthMode();
+                    document.getElementById('authForm').reset();
+                } else {
+                    currentUser = data;
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Welcome, ${data.full_name}`, showConfirmButton: false, timer: 2000 });
+                    loadDashboard();
+                }
+            } else {
+                Swal.fire('Error', data.error || 'Authentication failed', 'error');
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            currentUser = null;
+            document.getElementById('authSection').classList.remove('hidden');
             document.getElementById('studentDashboard').classList.add('hidden');
             document.getElementById('staffDashboard').classList.add('hidden');
             document.getElementById('logoutBtn').classList.add('hidden');
             document.getElementById('userBadge').classList.add('hidden');
+            document.getElementById('authForm').reset();
+        }
+
+        function loadDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            
+            const badge = document.getElementById('userBadge');
+            badge.classList.remove('hidden');
+            badge.innerText = `${currentUser.full_name} (${currentUser.role.toUpperCase()})`;
+
+            if (currentUser.role === 'student') {
+                document.getElementById('studentDashboard').classList.remove('hidden');
+                document.getElementById('staffDashboard').classList.add('hidden');
+            } else {
+                document.getElementById('staffDashboard').classList.remove('hidden');
+                document.getElementById('studentDashboard').classList.add('hidden');
+            }
+            fetchComplaints();
         }
 
         async function submitComplaint(e) {
             e.preventDefault();
-            
-            Swal.fire({
-                title: 'Submitting...', allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading() }
-            });
+            Swal.fire({ title: 'Submitting...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
 
             const payload = {
-                student_name: document.getElementById('studentName').value,
-                roll_number: document.getElementById('rollNumber').value,
-                college_email: document.getElementById('collegeEmail').value,
                 hostel_name: document.getElementById('hostelName').value,
                 room_number: document.getElementById('roomNumber').value,
                 issue_title: document.getElementById('issueTitle').value,
                 issue_description: document.getElementById('issueDesc').value
             };
 
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+            await fetch('/api/complaints', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            });
 
-                document.getElementById('complaintForm').reset();
-                Swal.fire({
-                    icon: 'success', title: 'Submitted!',
-                    text: 'Your complaint has been registered with the warden.',
-                    confirmButtonColor: '#1e3a8a'
-                });
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Something went wrong!' });
-            }
+            document.getElementById('complaintForm').reset();
+            Swal.fire({ icon: 'success', title: 'Submitted!', confirmButtonColor: '#1e3a8a' });
+            fetchComplaints();
         }
 
         async function fetchComplaints() {
-            const response = await fetch(API_URL);
+            const response = await fetch('/api/complaints');
             const complaints = await response.json();
-            const tbody = document.getElementById('complaintsTableBody');
+            
+            const tbody = currentUser.role === 'student' ? document.getElementById('studentComplaintsTableBody') : document.getElementById('complaintsTableBody');
             tbody.innerHTML = '';
 
             if(complaints.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No active complaints found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No complaints found.</td></tr>`;
                 return;
             }
 
             complaints.forEach(c => {
-                let statusBadge = '';
-                if(c.status === 'Pending') statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">Pending</span>`;
-                else if (c.status === 'In Progress') statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">In Progress</span>`;
-                else statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">Resolved</span>`;
-
+                let statusBadge = c.status === 'Pending' ? `<span class="px-2 py-1 rounded text-xs bg-red-100 text-red-800">Pending</span>` : 
+                                 (c.status === 'In Progress' ? `<span class="px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-800">In Progress</span>` : 
+                                 `<span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Resolved</span>`);
+                
                 let dateObj = new Date(c.date_submitted);
-                let formattedDate = dateObj.toLocaleDateString('en-GB') + '<br><span class="text-xs text-gray-400">' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + '</span>';
+                let dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                let actions = '';
-                if (c.status !== 'Resolved') {
-                    actions = `
-                        <div class="flex justify-end space-x-2">
-                            ${c.status === 'Pending' ? `<button onclick="updateStatus(${c.id}, 'In Progress')" class="text-yellow-600 hover:text-yellow-900 bg-yellow-50 hover:bg-yellow-100 p-2 rounded-lg transition" title="Mark In Progress"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></button>` : ''}
-                            <button onclick="updateStatus(${c.id}, 'Resolved')" class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition" title="Mark Resolved"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>
-                        </div>
-                    `;
+                if(currentUser.role === 'student') {
+                    // Slim view for students
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-3 whitespace-nowrap text-gray-500">${dateStr}</td>
+                            <td class="px-6 py-3 font-bold">${c.issue_title}</td>
+                            <td class="px-6 py-3">${statusBadge}</td>
+                        </tr>`;
                 } else {
-                    actions = `<span class="text-gray-400 text-sm flex justify-end items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Closed</span>`;
-                }
+                    // Full admin view
+                    let actions = c.status !== 'Resolved' ? `
+                        <button onclick="updateStatus(${c.id}, 'In Progress')" class="text-yellow-600 hover:text-yellow-900 mr-2 border rounded p-1">Progress</button>
+                        <button onclick="updateStatus(${c.id}, 'Resolved')" class="text-green-600 hover:text-green-900 border rounded p-1">Done</button>
+                    ` : '<span class="text-gray-400">Closed</span>';
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-bold text-gray-900">${c.student_name}</div>
-                            <div class="text-xs text-gray-500 mt-0.5">${c.roll_number}</div>
-                            <a href="mailto:${c.college_email}" class="text-xs text-blue-600 hover:underline">${c.college_email}</a>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">${c.hostel_name}</div>
-                            <div class="text-sm text-gray-500">Room: <span class="font-bold">${c.room_number}</span></div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-bold text-gray-900">${c.issue_title}</div>
-                            <div class="text-sm text-gray-500 line-clamp-2 mt-0.5">${c.issue_description}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${actions}</td>
-                    </tr>
-                `;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-gray-500">${dateStr}</td>
+                            <td class="px-6 py-4"><b>${c.student_name}</b><br><span class="text-xs text-gray-500">${c.roll_number}</span></td>
+                            <td class="px-6 py-4">${c.hostel_name} (Rm: ${c.room_number})</td>
+                            <td class="px-6 py-4"><b>${c.issue_title}</b><br><span class="text-xs">${c.issue_description}</span></td>
+                            <td class="px-6 py-4">${statusBadge}</td>
+                            <td class="px-6 py-4 text-right">${actions}</td>
+                        </tr>`;
+                }
             });
         }
 
         async function updateStatus(id, newStatus) {
-            await fetch(`${API_URL}/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
+            await fetch(`/api/complaints/${id}`, {
+                method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: newStatus })
             });
-            
-            Swal.fire({
-                toast: true, position: 'bottom-end', icon: 'success',
-                title: `Status updated to ${newStatus}`, showConfirmButton: false, timer: 2000
-            });
-            
             fetchComplaints(); 
         }
     </script>
