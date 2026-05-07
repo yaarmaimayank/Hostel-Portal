@@ -97,19 +97,42 @@ def manage_complaints():
         conn.close()
         return jsonify([dict(ix) for ix in complaints])
 
-# --- UPDATED: ONLY ADMINS CAN CHANGE STATUS ---
+# --- UPDATED: TEACHERS CAN PROGRESS/RESOLVE, ADMINS CAN DO ALL ---
 @app.route('/api/complaints/<int:id>', methods=['PATCH'])
 def update_complaint(id):
-    if session.get('role') != 'admin':
-        return jsonify({'error': 'Unauthorized action. Admins only.'}), 403
+    role = session.get('role')
+    if role not in ['admin', 'teacher']:
+        return jsonify({'error': 'Unauthorized action.'}), 403
 
     data = request.get_json()
+    new_status = data['status']
+
+    # Block teachers from rejecting
+    if role == 'teacher' and new_status == 'Rejected':
+        return jsonify({'error': 'Only Admins can reject complaints.'}), 403
+
     conn = get_db_connection()
-    conn.execute('UPDATE complaints SET status = ? WHERE id = ?', (data['status'], id))
+    conn.execute('UPDATE complaints SET status = ? WHERE id = ?', (new_status, id))
     conn.commit()
     conn.close()
     
     return jsonify({'message': 'Status updated successfully'})
+
+# --- NEW: ADMIN CAN VIEW REGISTERED STUDENTS ---
+@app.route('/api/students', methods=['GET'])
+def get_students():
+    if session.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    conn = get_db_connection()
+    students = conn.execute("SELECT id, full_name, roll_number, email FROM users WHERE role = 'student' ORDER BY id DESC").fetchall()
+    total = conn.execute("SELECT COUNT(*) as count FROM users WHERE role = 'student'").fetchone()['count']
+    conn.close()
+    
+    return jsonify({
+        'total': total,
+        'students': [dict(ix) for ix in students]
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
