@@ -15,18 +15,38 @@ connection.execute('''
     )
 ''')
 
-# 2. Inject Default Admin Account
 cursor = connection.cursor()
+
+# 2. Inject Admin Account
 cursor.execute("SELECT * FROM users WHERE email='admin@iilm.edu'")
 if not cursor.fetchone():
-    hashed_pw = generate_password_hash('Admin123')
+    admin_pw = generate_password_hash('iilm@hostel2026')
     cursor.execute('''
         INSERT INTO users (full_name, email, password, role)
         VALUES ('System Admin', 'admin@iilm.edu', ?, 'admin')
-    ''', (hashed_pw,))
-    print("👑 Default Admin account created!")
+    ''', (admin_pw,))
+    print("👑 Admin account created!")
 
-# 3. Create Complaints Table (Same as before)
+# 3. Inject 5 View-Only Teacher Accounts
+teacher_pw = generate_password_hash('Teacher@2026')
+teachers = [
+    ('Warden / Teacher 1', 'teacher1@iilm.edu'),
+    ('Warden / Teacher 2', 'teacher2@iilm.edu'),
+    ('Warden / Teacher 3', 'teacher3@iilm.edu'),
+    ('Warden / Teacher 4', 'teacher4@iilm.edu'),
+    ('Warden / Teacher 5', 'teacher5@iilm.edu')
+]
+
+for name, email in teachers:
+    cursor.execute("SELECT * FROM users WHERE email=?", (email,))
+    if not cursor.fetchone():
+        cursor.execute('''
+            INSERT INTO users (full_name, email, password, role)
+            VALUES (?, ?, ?, 'teacher')
+        ''', (name, email, teacher_pw))
+print("👨‍🏫 5 View-Only Teacher accounts created!")
+
+# 4. Create Complaints Table
 connection.execute('DROP TABLE IF EXISTS complaints')
 connection.execute('''
     CREATE TABLE IF NOT EXISTS complaints (
